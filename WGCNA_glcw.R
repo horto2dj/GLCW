@@ -221,7 +221,7 @@ dev.off()
 # Here we will use "env variable" as trait and "color" as module
 # First get the links between all modules and this trait
 
-###OC-orange
+###OM-orange
 parameter<-"NUTR"
 weight <- as.data.frame(NMDS_META[,parameter])
 names(weight) = "NUTR"
@@ -390,26 +390,26 @@ for (j in 1:length(r2_vector$val)){
 print(paste(" the max r2 is ",max," corresponding to comp ",max_comp,sep="",".pdf"))
 
 if(max==0){
-   		print ("No good correlation, we stop here")
+  print ("No good correlation, we stop here")
 } else{
   print("Good correlation, we check the VIP!")
 }
-  # Checking the VIP
-  output<-paste("VIP_values_with_",parameter,sep="")
-  vip_result<-VIP(pls_result)
-  vip_components<-sort(vip_result[max_comp,],decreasing=TRUE)[1:69] # <- this value changes with subnetwork, check dim of 'subnetwork' file
-  for (i in 1:69){ # <- this value changes as the line above
-    cat(paste("Rank ",i," we have ",names(vip_components[i])," with a VIP of ",vip_components[i],"\n",sep=""),file=output,append=TRUE)
-  }
-  weight_2 <- as.data.frame(weight[!is.na(weight)])
-  df<-data.frame(x=weight_2,y=pls_result$validation$pred[,,max_comp])
-  colnames(df)<-c("x","y")
-  pdf(paste("measured_vs_predicted_",module,"-vs-",parameter,".pdf"))
-  ggplot(data=df) + geom_point(aes(x=x,y=y)) + geom_smooth(aes(x=x,y=y),method=lm) + xlab("Measured") + ylab("Predicted") + ggtitle(paste("Comparison of ",parameter," measured vs predicted for module ",module)) + theme(axis.text=element_text(color="black",size=10),axis.ticks=element_line(color="black"))
-  dev.off()
-  # Establish the correlation between predicted and modeled
-  # This is the data to report with the figure (R2, CI, signif, etc.)
-  cor.test(df$x,df$y)
+# Checking the VIP
+output<-paste("VIP_values_with_",parameter,sep="")
+vip_result<-VIP(pls_result)
+vip_components<-sort(vip_result[max_comp,],decreasing=TRUE)[1:69] # <- this value changes with subnetwork, check dim of 'subnetwork' file
+for (i in 1:69){ # <- this value changes as the line above
+  cat(paste("Rank ",i," we have ",names(vip_components[i])," with a VIP of ",vip_components[i],"\n",sep=""),file=output,append=TRUE)
+}
+weight_2 <- as.data.frame(weight[!is.na(weight)])
+df<-data.frame(x=weight_2,y=pls_result$validation$pred[,,max_comp])
+colnames(df)<-c("x","y")
+pdf(paste("measured_vs_predicted_",module,"-vs-",parameter,".pdf"))
+ggplot(data=df) + geom_point(aes(x=x,y=y)) + geom_smooth(aes(x=x,y=y),method=lm) + xlab("Measured") + ylab("Predicted") + ggtitle(paste("Comparison of ",parameter," measured vs predicted for module ",module)) + theme(axis.text=element_text(color="black",size=10),axis.ticks=element_line(color="black"))
+dev.off()
+# Establish the correlation between predicted and modeled
+# This is the data to report with the figure (R2, CI, signif, etc.)
+cor.test(df$x,df$y)
 
 ## Identify node centrality based on co-occurence data for each OTU in the module
 

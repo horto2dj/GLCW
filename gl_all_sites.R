@@ -29,18 +29,19 @@ setwd("~/Grad School/Central Michigan/Dissertation/Great Lakes Coastal Wetlands/
 ##########################
 
 #Here create a text file with all the coords needs a column of lat and long in decimal degrees
-Sample_coords<- read.csv("GLCW_coordinates_region.csv", header=TRUE, row.names = 1)
+Sample_coords<- read.csv("GLCW_coordinates_sites.csv", header=TRUE, row.names = 1)
 map1<-get_googlemap(center=c(-85,44), zoom=7, size=c(420,640), maptype="satellite")
 MapMiLakes<-ggmap(map1)+
   geom_point(data=Sample_coords, aes(x=long, y=lat,
-                                     colour = rownames(Sample_coords)),
-             size=5, show.legend = TRUE)+
+                                     fill = Sample_coords$region),
+                                     shape = 21, size= 4, color = "white")+
   scale_color_brewer(type = "qual", palette = "Set1") +
   ylab("Latitude")+
   xlab("Longitude")+
   theme(legend.direction = 'vertical', 
-        legend.position = 'right')+
-  guides(colour=guide_legend(title="Region"))
+        legend.position = 'right',
+        legend.key = element_rect(fill = "white"))+
+  guides(fill=guide_legend(title="Region"))
 MapMiLakes
 ggsave("GLCW_Map.pdf", MapMiLakes)
 
@@ -73,11 +74,11 @@ names(GLCWsitePCA)
 
 # transform pH
 pH <- 10^-GLCWsitePCA[,6]
-GLCWsitePCA <- cbind(GLCWsitePCA[,c(1:5,7:12)], pH)
+GLCWsitePCA <- cbind(GLCWsitePCA[,c(1:5,7:13)], pH)
 
 # pearson correlation analysis
 # check to see if any variables are autocorrelated
-rcorr(as.matrix(GLCWsitePCA[,4:12]), type="pearson")
+rcorr(as.matrix(GLCWsitePCA[,4:13]), type="pearson")
 
 # List (corr > 0.7 and sig < 0.01 level)
 # DO represents Redox_pot
@@ -85,7 +86,7 @@ rcorr(as.matrix(GLCWsitePCA[,4:12]), type="pearson")
 GLCWsitePCA <- GLCWsitePCA[-c(6:7,9)]
 
 # apply PCA
-GLCWsite.pca <- prcomp(GLCWsitePCA[,4:9], center = TRUE, scale. = TRUE)
+GLCWsite.pca <- prcomp(GLCWsitePCA[,4:10], center = TRUE, scale. = TRUE)
 
 # print method
 print(GLCWsite.pca)
@@ -101,15 +102,17 @@ summary(GLCWsite.pca)
 wetland <- as.factor(GLCWsitePCA$Wetland)
 region <- as.factor(GLCWsitePCA$Region)
 GLPCA <- ggbiplot(GLCWsite.pca, obs.scale = 1, var.scale = 1, 
-                  groups = GLCWsitePCA$Region, ellipse = TRUE, 
+                  groups = GLCWsitePCA$Region, ellipse = FALSE, 
                   circle = FALSE, varname.adjust = 1) +
   scale_color_discrete() +
-  geom_point(aes(colour = wetland,
-                 shape = region),size=3) +
+  geom_point(aes(colour = region),size=3) +
   theme(legend.direction = 'vertical', 
         legend.position = 'right') +
   #geom_text_repel(aes(label = wetland)) +
-  theme_classic()
+  theme_classic() +
+  guides(colour=guide_legend(title="Region")) #+
+  #stat_ellipse(aes(fill= region, guide = FALSE),
+  #             geom="polygon", level=0.95, alpha=0.2)
 GLPCA
 
 #Finding point coordinates on biplot
@@ -423,8 +426,11 @@ talpha_OTU <- t(alpha_otu2)
 write.csv(talpha_OTU,"talpha_OTU.csv")
 alpha_otu <- read.csv("talpha_OTU.csv", header = TRUE, row.names = 1)
 alpha_otut <- t(alpha_otu)
-alpharare <- rarecurve(alpha_otut, step = 20000, col = 2:75, label = FALSE, ylab = "OTUs")
+par(pty="s")
+alpharare <- rarecurve(alpha_otut, step = 2000, col = 2:75, label = FALSE,
+                       ylab = "OTUs")
 abline(v = 48226)
+abline(a = 0, b = 1, lty = 2)
 
 
 ### Chao1
